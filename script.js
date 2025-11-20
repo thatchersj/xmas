@@ -4,6 +4,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const cardCover = document.getElementById("cardCover");
   const cardInner = document.getElementById("cardInner");
   const cardMessage = document.getElementById("cardMessage");
+  const cardScene = document.getElementById("cardScene");
+  const coverImage = document.getElementById("coverImage");
+  const innerImage = document.getElementById("innerImage");
+
 
   const GENERIC_TITLE = "Merry Christmas!";
   const GENERIC_MESSAGE = "Wishing you all the best in the new year!";
@@ -73,6 +77,34 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function waitForImage(img) {
+    return new Promise((resolve) => {
+      if (!img) {
+        resolve();
+        return;
+      }
+      if (img.complete) {
+        resolve();
+      } else {
+        img.addEventListener("load", resolve, { once: true });
+        img.addEventListener("error", resolve, { once: true });
+      }
+    });
+  }
+
+  async function prepareCardScene() {
+    try {
+      await Promise.all([
+        waitForImage(coverImage),
+        waitForImage(innerImage),
+      ]);
+    } finally {
+      if (cardScene) {
+        cardScene.classList.remove("loading");
+      }
+    }
+  }
+
   function showGenericMessage() {
     cardMessage.innerHTML = `<h2>${GENERIC_TITLE}</h2><p>${GENERIC_MESSAGE}</p>`;
   }
@@ -133,6 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadMessage();
+  prepareCardScene();
 
   // Open the card when the cover is clicked
   cardCover.addEventListener("click", () => {

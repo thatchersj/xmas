@@ -102,3 +102,48 @@ body {
 .card.open .card-cover {
   transform: rotateY(-180deg);
 }
+
+/* Hide the card scene until images are ready to avoid flicker */
+.card-scene {
+  transition: opacity 0.3s ease;
+}
+
+.card-scene.loading {
+  visibility: hidden;
+  opacity: 0;
+}
+
+/* Responsive layout for small screens so the whole card fits */
+@media (max-width: 700px), (max-height: 500px) {
+  body {
+    align-items: flex-start;
+    padding: 8px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 380px;
+    height: auto;
+    aspect-ratio: 3 / 2;
+  }
+
+  .card-cover,
+  .card-inner-right {
+    height: 100%;
+  }
+
+  .card-message {
+    padding: 16px;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .card {
+    max-width: 340px;
+  }
+
+  .card-message {
+    font-size: 0.9rem;
+  }
+}
