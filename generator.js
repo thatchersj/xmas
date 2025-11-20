@@ -1,6 +1,6 @@
 // generator.js
 
-// base64 helpers
+// --- base64 helpers ---
 function arrayBufferToBase64(buffer) {
   return btoa(String.fromCharCode(...new Uint8Array(buffer)));
 }
@@ -15,6 +15,7 @@ function randomBytes(length) {
   return buf;
 }
 
+// --- key derivation & encryption (same scheme as card page) ---
 async function deriveKeyFromPassphrase(passphrase, saltBytes) {
   const enc = new TextEncoder();
   const passphraseKey = await crypto.subtle.importKey(
@@ -65,60 +66,139 @@ async function encryptMessage(plaintext, passphrase) {
 
 document.addEventListener("DOMContentLoaded", () => {
   const baseUrlInput = document.getElementById("baseUrl");
+
+  // Single-message DOM
   const recipientIdInput = document.getElementById("recipientId");
   const messageInput = document.getElementById("message");
   const generateBtn = document.getElementById("generateBtn");
   const urlOutput = document.getElementById("urlOutput");
   const jsonOutput = document.getElementById("jsonOutput");
 
+  // Bulk DOM
+  const plaintextFileInput = document.getElementById("plaintextFile");
+  const bulkGenerateBtn = document.getElementById("bulkGenerateBtn");
+  const bulkUrlOutput = document.getElementById("bulkUrlOutput");
+  const bulkJsonOutput = document.getElementById("bulkJsonOutput");
+
   // Pre-fill base URL (strip generator.html from path)
   if (baseUrlInput && !baseUrlInput.value) {
     const loc = window.location;
-    const base =
-      loc.origin + loc.pathname.replace(/\/[^\/]*$/, "/");
+    const base = loc.origin + loc.pathname.replace(/\/[^\/]*$/, "/");
     baseUrlInput.value = base;
   }
 
-  generateBtn.addEventListener("click", async (e) => {
-    e.preventDefault();
+  // --- Single-message generation ---
+  if (generateBtn) {
+    generateBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
 
-    const baseUrl = baseUrlInput.value.trim();
-    const recipientId = recipientIdInput.value.trim();
-    const message = messageInput.value;
+      const baseUrl = baseUrlInput.value.trim();
+      const recipientId = recipientIdInput.value.trim();
+      const message = messageInput.value;
 
-    if (!baseUrl || !recipientId || !message) {
-      alert("Please fill in base URL, recipient ID, and message.");
-      return;
-    }
+      if (!baseUrl || !recipientId || !message) {
+        alert("Please fill in base URL, recipient ID, and message.");
+        return;
+      }
 
-    try {
-      // Generate random URL key (this is what goes in ?k=)
-      const urlKeyBytes = randomBytes(16);
-      const urlKey = bytesToBase64(urlKeyBytes);
+      try {
+        const urlKeyBytes = randomBytes(16);
+        const urlKey = bytesToBase64(urlKeyBytes);
 
-      // Encrypt the message using the same scheme the main page expects
-      const encrypted = await encryptMessage(message, urlKey);
+        const encrypted = await encryptMessage(message, urlKey);
 
-      // Build the URL
-      const url =
-        `${baseUrl}?id=${encodeURIComponent(recipientId)}` +
-        `&k=${encodeURIComponent(urlKey)}`;
+        const url =
+          `${baseUrl}?id=${encodeURIComponent(recipientId)}` +
+          `&k=${encodeURIComponent(urlKey)}`;
 
-      urlOutput.textContent = `Send this URL to ${recipientId}:\n${url}`;
+        urlOutput.textContent = `Send this URL to ${recipientId}:\n${url}`;
 
-      // JSON entry for messages-encrypted.json
-      const jsonSnippet =
-        `"${recipientId}": {\n` +
-        `  "iv": "${encrypted.iv}",\n` +
-        `  "salt": "${encrypted.salt}",\n` +
-        `  "ciphertext": "${encrypted.ciphertext}"\n` +
-        `}`;
+        const jsonSnippet =
+          `"${recipientId}": {\n` +
+          `  "iv": "${encrypted.iv}",\n` +
+          `  "salt": "${encrypted.salt}",\n` +
+          `  "ciphertext": "${encrypted.ciphertext}"\n` +
+          `}`;
 
-      jsonOutput.textContent =
-        `Add this inside messages-encrypted.json:\n\n${jsonSnippet}`;
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong generating the encrypted message.");
-    }
-  });
+        jsonOutput.textContent =
+          `Add this inside messages-encrypted.json:\n\n${jsonSnippet}`;
+      } catch (err) {
+        console.error(err);
+        alert("Something went wrong generating the encrypted message.");
+      }
+    });
+  }
+
+  // --- Bulk generation from unencrypted-messages.json ---
+  if (bulkGenerateBtn) {
+    bulkGenerateBtn.addEventListener("click", async (e) => {
+      e.preventDefault();
+
+      const baseUrl = baseUrlInput.value.trim();
+      if (!baseUrl) {
+        alert("Please fill in the base URL first.");
+        return;
+      }
+
+      const file = plaintextFileInput.files && plaintextFileInput.files[0];
+      if (!file) {
+        alert("Please choose an unencrypted-messages.json file.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const text = reader.result;
+          const json = JSON.parse(text);
+
+          if (typeof json !== "object" || json === null || Array.isArray(json)) {
+            alert("JSON must be an object mapping ids to messages.");
+            return;
+          }
+
+          const encryptedMessages = {};
+          const urls = [];
+
+          // Process each entry
+          for (const [id, msg] of Object.entries(json)) {
+            if (typeof msg !== "string") {
+              console.warn(`Skipping id "${id}" because value is not a string.`);
+              continue;
+            }
+
+            const urlKeyBytes = randomBytes(16);
+            const urlKey = bytesToBase64(urlKeyBytes);
+
+            const encrypted = await encryptMessage(msg, urlKey);
+            encryptedMessages[id] = encrypted;
+
+            const url =
+              `${baseUrl}?id=${encodeURIComponent(id)}` +
+              `&k=${encodeURIComponent(urlKey)}`;
+            urls.push(`${id}: ${url}`);
+          }
+
+          // Output URLs
+          bulkUrlOutput.textContent =
+            urls.length
+              ? urls.join("\n")
+              : "(No valid messages found in file.)";
+
+          // Output full encrypted JSON
+          bulkJsonOutput.textContent = JSON.stringify(encryptedMessages, null, 2);
+        } catch (err) {
+          console.error(err);
+          alert("Error reading or parsing the JSON file.");
+        }
+      };
+
+      reader.onerror = () => {
+        console.error(reader.error);
+        alert("Failed to read the file.");
+      };
+
+      reader.readAsText(file);
+    });
+  }
 });

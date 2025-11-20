@@ -11,9 +11,10 @@
       align-items: stretch;
       padding: 20px;
       background-color: #f7f7f7;
+      font-family: Arial, sans-serif;
     }
     .generator-container {
-      max-width: 600px;
+      max-width: 800px;
       margin: 0 auto;
       background: white;
       padding: 20px;
@@ -23,6 +24,9 @@
     .generator-container h1 {
       margin-top: 0;
       text-align: center;
+    }
+    h2 {
+      margin-top: 24px;
     }
     label {
       display: block;
@@ -48,17 +52,23 @@
       font-size: 16px;
     }
     .output {
-      margin-top: 20px;
+      margin-top: 12px;
       font-family: monospace;
       white-space: pre-wrap;
       background: #f0f0f0;
       padding: 10px;
       border-radius: 8px;
+      max-height: 300px;
+      overflow: auto;
     }
     .small-note {
       font-size: 0.9em;
       color: #555;
       margin-top: 8px;
+    }
+    .section-divider {
+      margin: 30px 0;
+      border-top: 1px solid #ddd;
     }
   </style>
 </head>
@@ -66,12 +76,18 @@
   <div class="generator-container">
     <h1>Message Generator</h1>
     <p class="small-note">
-      This tool runs entirely in your browser. Type a recipient ID and message,
-      then paste the generated JSON into <code>messages-encrypted.json</code>.
+      This tool runs entirely in your browser. It never sends your plaintext messages anywhere.
     </p>
 
+    <!-- Shared base URL -->
     <label for="baseUrl">Base URL (where your index.html is hosted)</label>
     <input type="text" id="baseUrl" />
+
+    <!-- Single-message section -->
+    <h2>Single Message</h2>
+    <p class="small-note">
+      Use this to generate one personalised message and URL at a time.
+    </p>
 
     <label for="recipientId">Recipient ID (used in the URL as <code>?id=</code>)</label>
     <input type="text" id="recipientId" placeholder="e.g. alice" />
@@ -82,12 +98,38 @@
     <button id="generateBtn">Generate encrypted entry &amp; URL</button>
 
     <div class="small-note">
-      Tip: Don’t commit plaintext messages. Only commit the JSON entry added to <code>messages-encrypted.json</code>.
+      Copy the JSON into <code>messages-encrypted.json</code> in your repo.
     </div>
 
-    <h2>Result</h2>
     <div class="output" id="urlOutput">(URL will appear here)</div>
     <div class="output" id="jsonOutput">(JSON entry will appear here)</div>
+
+    <div class="section-divider"></div>
+
+    <!-- Bulk section -->
+    <h2>Bulk Encrypt from unencrypted-messages.json</h2>
+    <p class="small-note">
+      Provide a JSON file like:
+      <br>
+      <code>{ "alice": "Hi Alice", "bob": "Hi Bob" }</code>
+      <br>
+      and this tool will generate a complete <code>messages-encrypted.json</code> plus all personalised URLs.
+    </p>
+
+    <label for="plaintextFile">Upload unencrypted-messages.json</label>
+    <input type="file" id="plaintextFile" accept="application/json" />
+
+    <button id="bulkGenerateBtn">Generate encrypted file &amp; URLs</button>
+
+    <div class="small-note">
+      After generation, replace your existing <code>messages-encrypted.json</code> with the encrypted JSON below.
+    </div>
+
+    <h3>Bulk URLs</h3>
+    <div class="output" id="bulkUrlOutput">(Bulk URLs will appear here)</div>
+
+    <h3>Encrypted JSON</h3>
+    <div class="output" id="bulkJsonOutput">(Full messages-encrypted.json will appear here)</div>
   </div>
 
   <script src="generator.js"></script>
