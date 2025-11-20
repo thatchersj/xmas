@@ -2,6 +2,7 @@
 document.addEventListener("DOMContentLoaded", () => {
   const card = document.getElementById("card");
   const cardCover = document.getElementById("cardCover");
+  const cardInner = document.getElementById("cardInner");
   const cardMessage = document.getElementById("cardMessage");
 
   const GENERIC_TITLE = "Merry Christmas!";
@@ -117,11 +118,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Open the card when the cover is clicked
   cardCover.addEventListener("click", () => {
-    card.classList.add("open");
+    card.classList.toggle("open");
   });
 
   // Close the card when the message (right page) is clicked
-  cardMessage.addEventListener("click", () => {
+  cardInner.addEventListener("click", () => {
     card.classList.remove("open");
   });
 });
