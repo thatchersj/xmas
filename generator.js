@@ -69,6 +69,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Single-message DOM
   const recipientIdInput = document.getElementById("recipientId");
+  const displayNameInput = document.getElementById("displayName");
   const messageInput = document.getElementById("message");
   const generateBtn = document.getElementById("generateBtn");
   const urlOutput = document.getElementById("urlOutput");
@@ -94,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const baseUrl = baseUrlInput.value.trim();
       const recipientId = recipientIdInput.value.trim();
+      const displayNameRaw = (displayNameInput.value || "").trim();
       const message = messageInput.value;
 
       if (!baseUrl || !recipientId || !message) {
@@ -105,7 +107,14 @@ document.addEventListener("DOMContentLoaded", () => {
         const urlKeyBytes = randomBytes(16);
         const urlKey = bytesToBase64(urlKeyBytes);
 
-        const encrypted = await encryptMessage(message, urlKey);
+        // Build plaintext object to encrypt
+        const plaintextObj = {
+          displayName: displayNameRaw || recipientId,
+          message: message
+        };
+        const plaintextJson = JSON.stringify(plaintextObj);
+
+        const encrypted = await encryptMessage(plaintextJson, urlKey);
 
         const url =
           `${baseUrl}?id=${encodeURIComponent(recipientId)}` +
@@ -161,17 +170,42 @@ document.addEventListener("DOMContentLoaded", () => {
           const urls = [];
 
           // Process each entry
-          for (const [id, msg] of Object.entries(json)) {
-            if (typeof msg !== "string") {
-              console.warn(`Skipping id "${id}" because value is not a string.`);
+          for (const [id, raw] of Object.entries(json)) {
+            let message;
+            let displayName;
+
+            if (typeof raw === "string") {
+              // Simple form: "id": "message"
+              message = raw;
+              displayName = id;
+            } else if (raw && typeof raw === "object") {
+              // Extended form: "id": { "displayName": "...", "message": "..." }
+              message = raw.message;
+              displayName = raw.displayName || id;
+            }
+
+            if (typeof message !== "string" || !message.length) {
+              console.warn(`Skipping id "${id}" because it has no valid message.`);
               continue;
             }
 
             const urlKeyBytes = randomBytes(16);
             const urlKey = bytesToBase64(urlKeyBytes);
 
-            const encrypted = await encryptMessage(msg, urlKey);
-            encryptedMessages[id] = encrypted;
+            // Plaintext object to encrypt
+            const plaintextObj = {
+              displayName,
+              message
+            };
+            const plaintextJson = JSON.stringify(plaintextObj);
+
+            const encrypted = await encryptMessage(plaintextJson, urlKey);
+
+            encryptedMessages[id] = {
+              iv: encrypted.iv,
+              salt: encrypted.salt,
+              ciphertext: encrypted.ciphertext
+            };
 
             const url =
               `${baseUrl}?id=${encodeURIComponent(id)}` +

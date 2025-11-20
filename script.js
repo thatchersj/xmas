@@ -102,12 +102,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const decrypted = await decryptMessage(entry, keyFromUrl);
       if (!decrypted) {
-        console.warn("Decryption returned null for recipientId:", recipientId);
-        showGenericMessage();
-        return;
+      console.warn("Decryption returned null for recipientId:", recipientId);
+      showGenericMessage();
+      return;
       }
 
-      cardMessage.innerHTML = `<h2>Dear ${recipientId}</h2><p>${decrypted}</p>`;
+      let displayName = recipientId;
+      let messageText = decrypted;
+
+      try {
+      // Try to interpret the decrypted text as JSON with { displayName, message }
+      const parsed = JSON.parse(decrypted);
+      if (parsed && typeof parsed === "object") {
+          if (typeof parsed.displayName === "string" && parsed.displayName.trim()) {
+          displayName = parsed.displayName.trim();
+          }
+          if (typeof parsed.message === "string") {
+          messageText = parsed.message;
+          }
+      }
+      } catch {
+      // Not JSON → old style, treat decrypted as plain message
+      }
+
+      cardMessage.innerHTML = `<h2>To ${displayName}</h2><p>${messageText}</p>`;
     } catch (err) {
       console.error("Error loading encrypted messages:", err);
       showGenericMessage();
