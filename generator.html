@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Christmas Card Message Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      flex-direction: column;
+      align-items: stretch;
+      padding: 20px;
+      background-color: #f7f7f7;
+    }
+    .generator-container {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .generator-container h1 {
+      margin-top: 0;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+      font-weight: bold;
+    }
+    input[type="text"],
+    textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px;
+      margin-top: 4px;
+    }
+    textarea {
+      min-height: 100px;
+    }
+    button {
+      margin-top: 16px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .output {
+      margin-top: 20px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 8px;
+    }
+    .small-note {
+      font-size: 0.9em;
+      color: #555;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="generator-container">
+    <h1>Message Generator</h1>
+    <p class="small-note">
+      This tool runs entirely in your browser. Type a recipient ID and message,
+      then paste the generated JSON into <code>messages-encrypted.json</code>.
+    </p>
+
+    <label for="baseUrl">Base URL (where your index.html is hosted)</label>
+    <input type="text" id="baseUrl" />
+
+    <label for="recipientId">Recipient ID (used in the URL as <code>?id=</code>)</label>
+    <input type="text" id="recipientId" placeholder="e.g. alice" />
+
+    <label for="message">Message</label>
+    <textarea id="message" placeholder="Type the personalised message here"></textarea>
+
+    <button id="generateBtn">Generate encrypted entry &amp; URL</button>
+
+    <div class="small-note">
+      Tip: Don’t commit plaintext messages. Only commit the JSON entry added to <code>messages-encrypted.json</code>.
+    </div>
+
+    <h2>Result</h2>
+    <div class="output" id="urlOutput">(URL will appear here)</div>
+    <div class="output" id="jsonOutput">(JSON entry will appear here)</div>
+  </div>
+
+  <script src="generator.js"></script>
+</body>
+</html>

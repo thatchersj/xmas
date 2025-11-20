@@ -1,24 +1,126 @@
+// script.js
 document.addEventListener("DOMContentLoaded", () => {
   const card = document.getElementById("card");
   const cardImage = document.getElementById("cardImage");
   const cardMessage = document.getElementById("cardMessage");
 
-  // Get the URL parameters
+  const GENERIC_TITLE = "Merry Christmas!";
+  const GENERIC_MESSAGE = "Wishing you all the best in the new year!";
+
+  // --- URL parameter handling ---
   const urlParams = new URLSearchParams(window.location.search);
-  const user = urlParams.get('user');
+  const recipientId = urlParams.get("id");
+  const keyFromUrl = urlParams.get("k"); // per-recipient secret
 
-  // Load the message for the user or fallback
-  fetch('messages.json')
-    .then(response => response.json())
-    .then(data => {
-      const message = data[user] || "Merry Christmas! Wishing you all the best in the new year!";
-      cardMessage.innerHTML = `<h2>Dear ${user || 'Friend'}</h2><p>${message}</p>`;
-    })
-    .catch(() => {
-      cardMessage.innerHTML = `<h2>Merry Christmas!</h2><p>Wishing you all the best in the new year!</p>`;
-    });
+  // Helpers for base64 <-> ArrayBuffer
+  function base64ToArrayBuffer(base64) {
+    const binaryString = atob(base64);
+    const len = binaryString.length;
+    const bytes = new Uint8Array(len);
+    for (let i = 0; i < len; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes.buffer;
+  }
 
-  // Flip the card on click
+  function arrayBufferToString(buffer) {
+    return new TextDecoder().decode(buffer);
+  }
+
+  async function deriveKeyFromPassphrase(passphrase, saltBytes) {
+    const enc = new TextEncoder();
+    const passphraseKey = await crypto.subtle.importKey(
+      "raw",
+      enc.encode(passphrase),
+      "PBKDF2",
+      false,
+      ["deriveKey"]
+    );
+
+    return crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        salt: saltBytes,
+        iterations: 100000,
+        hash: "SHA-256",
+      },
+      passphraseKey,
+      {
+        name: "AES-GCM",
+        length: 256,
+      },
+      false,
+      ["decrypt"]
+    );
+  }
+
+  async function decryptMessage(entry, passphrase) {
+    try {
+      const iv = new Uint8Array(base64ToArrayBuffer(entry.iv));
+      const salt = new Uint8Array(base64ToArrayBuffer(entry.salt));
+      const ciphertext = base64ToArrayBuffer(entry.ciphertext);
+
+      const key = await deriveKeyFromPassphrase(passphrase, salt);
+      const plaintextBuffer = await crypto.subtle.decrypt(
+        { name: "AES-GCM", iv },
+        key,
+        ciphertext
+      );
+
+      return arrayBufferToString(plaintextBuffer);
+    } catch (e) {
+      // Any error (wrong key, tampering, etc.) will fall back to generic
+      console.warn("Decryption failed or invalid data:", e);
+      return null;
+    }
+  }
+
+  function showGenericMessage() {
+    cardMessage.innerHTML = `<h2>${GENERIC_TITLE}</h2><p>${GENERIC_MESSAGE}</p>`;
+  }
+
+  async function loadMessage() {
+    // If no id or key, immediately show generic
+    if (!recipientId || !keyFromUrl) {
+      showGenericMessage();
+      return;
+    }
+
+    try {
+      const response = await fetch("messages-encrypted.json");
+      if (!response.ok) {
+        showGenericMessage();
+        return;
+      }
+
+      const data = await response.json();
+      const entry = data[recipientId];
+
+      if (!entry) {
+        // Unknown id -> generic
+        showGenericMessage();
+        return;
+      }
+
+      const decrypted = await decryptMessage(entry, keyFromUrl);
+      if (!decrypted) {
+        // Invalid key or failed decryption -> generic
+        showGenericMessage();
+        return;
+      }
+
+      // Success! Show personalised message
+      const safeName = recipientId; // or prettify if you want
+      cardMessage.innerHTML = `<h2>Dear ${safeName}</h2><p>${decrypted}</p>`;
+    } catch (err) {
+      console.error("Error loading encrypted messages:", err);
+      showGenericMessage();
+    }
+  }
+
+  loadMessage();
+
+  // Flip the card on click (same behaviour as before)
   cardImage.addEventListener("click", () => {
     card.classList.toggle("flipped");
   });
