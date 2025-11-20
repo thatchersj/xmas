@@ -1,7 +1,7 @@
 // script.js
 document.addEventListener("DOMContentLoaded", () => {
   const card = document.getElementById("card");
-  const cardImage = document.getElementById("cardImage");
+  const cardCover = document.getElementById("cardCover");
   const cardMessage = document.getElementById("cardMessage");
 
   const GENERIC_TITLE = "Merry Christmas!";
@@ -115,13 +115,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadMessage();
 
-  // Flip to inside when the front image is clicked
-  cardImage.addEventListener("click", () => {
-    card.classList.toggle("flipped");
+  // Open the card when the front cover is clicked
+  cardCover.addEventListener("click", () => {
+    card.classList.add("open");
   });
 
-  // Flip back to front when the message side is clicked
+  // Close the card when the message side is clicked
   cardMessage.addEventListener("click", () => {
-    card.classList.remove("flipped"); // or .toggle("flipped") if you like
+    card.classList.remove("open");
   });
 });

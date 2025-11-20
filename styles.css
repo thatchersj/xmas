@@ -8,45 +8,92 @@ body {
   background-color: #f0f0f0;
 }
 
-.card {
-  width: 300px;
-  height: 450px;
-  perspective: 1000px;
+/* Add a scene wrapper to hold perspective */
+.card-scene {
+  perspective: 1200px;
 }
 
-.card-image, .card-message {
-  width: 100%;
-  height: 100%;
+/* The card is the full double spread */
+.card {
+  position: relative;
+  width: 600px;   /* double spread width */
+  height: 400px;  /* card height */
+  transform-style: preserve-3d;
+}
+
+/* Front cover – left page that swings open */
+.card-cover {
   position: absolute;
   top: 0;
   left: 0;
-  transition: transform 1s;
+  width: 50%;     /* left half of the spread */
+  height: 100%;
+  transform-origin: left center;
+  transform-style: preserve-3d;
+  transition: transform 0.9s ease;
+  z-index: 2;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  background: #fff;
   backface-visibility: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
+/* Cover image fills the cover panel */
 .card-image {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  cursor: pointer;
-}
-
-.card-message {
-  background-color: white;
-  padding: 20px;
-  box-sizing: border-box;
-  display: none;
-}
-
-.card.flipped .card-image {
-  transform: rotateY(180deg);
-}
-
-.card.flipped .card-message {
   display: block;
 }
 
+/* Inside spread – two pages side by side */
+.card-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;    /* full double spread */
+  height: 100%;
+  display: flex;
+  background: #fdfaf2;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Left inside page */
+.card-inner-left {
+  flex: 1;
+  border-right: 1px solid #e0d7c8;
+  background: repeating-linear-gradient(
+    90deg,
+    #fdfaf2,
+    #fdfaf2 10px,
+    #f9f1e4 10px,
+    #f9f1e4 20px
+  ); /* very subtle pattern, optional */
+}
+
+/* Right inside page (where the message goes) */
+.card-inner-right {
+  flex: 1;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+}
+
+/* Message block */
 .card-message {
-  cursor: pointer;
+  cursor: pointer; /* indicates you can click to close */
+  text-align: left;
+  line-height: 1.4;
+}
+
+.card-message h2 {
+  margin-top: 0;
+}
+
+/* When the card is “open”, rotate the cover away */
+.card.open .card-cover {
+  transform: rotateY(-180deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
