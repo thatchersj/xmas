@@ -66,6 +66,13 @@ body {
   border-radius: 0 4px 4px 0;
 }
 
+.inner-card-image {
+    width: 80%;
+    border: #ed0027;
+    border-width: thick;
+    border-style: inset;
+}
+
 /* Right inside page */
 .card-inner-right {
   position: absolute;
