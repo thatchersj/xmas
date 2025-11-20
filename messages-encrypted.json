@@ -1,2 +1,17 @@
 {
+  "alice": {
+    "salt": "w9Kkq3f2Svhl6l/2dIfCVg==",
+    "iv": "ekc0vg8UxLHjgXuD",
+    "ciphertext": "CE6fX2JSuDsg2OPOqHoslpDOCMwQt7tiuHcE+P/ndJFT1Oh2grKh6f6KPz+uxybW1uIGq+WkNzgR4aEeBwRiTdWYIp7aup6U"
+  },
+  "bob": {
+    "salt": "ZRtEAQJ8fsfeQ85zvnRdPA==",
+    "iv": "P4jBXRuCmRzfFeAX",
+    "ciphertext": "XucSA31536A46Jnto7C4+kbXoA2waW6z27KCyeajBWBDlMVEESgZeLBketpTXLgUbE631Uj5oKnennPsnHiH51FCC+eTLtXwmU3pcSi+nPA9dW4UADs="
+  },
+  "carol": {
+    "salt": "fqGSLRqTfLDDNJzkCMV4DA==",
+    "iv": "Xln+XNXqUqKlNGUH",
+    "ciphertext": "hYt68fkMUSqDfewmIPkTtSwf+Y8GKPpc0NwElPBZs0wqUn4ncrVNmoDBBBZo93LXwkE/hYM+gvoEsIDXd0sfA5MkJNRVTaOBnq+WZOwvNodBpw5BWQ=="
+  }
 }
