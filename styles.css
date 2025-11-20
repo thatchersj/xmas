@@ -8,60 +8,49 @@ body {
   background-color: #f0f0f0;
 }
 
-/* Add a scene wrapper to hold perspective */
+/* Scene gives us perspective */
 .card-scene {
   perspective: 1200px;
 }
 
-/* The card is the full double spread */
+/* Full double-spread */
 .card {
   position: relative;
-  width: 600px;   /* double spread width */
-  height: 400px;  /* card height */
-  transform-style: preserve-3d;
+  width: 600px;
+  height: 400px;
 }
 
-/* Front cover – left page that swings open */
+/* Hinged cover (left half) */
 .card-cover {
   position: absolute;
   top: 0;
   left: 0;
-  width: 50%;     /* left half of the spread */
+  width: 50%;
   height: 100%;
   transform-origin: left center;
   transform-style: preserve-3d;
   transition: transform 0.9s ease;
   z-index: 2;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-  background: #fff;
-  backface-visibility: hidden;
 }
 
-/* Cover image fills the cover panel */
-.card-image {
+/* Faces of the cover (front + back) */
+.card-face {
+  position: absolute;
   width: 100%;
   height: 100%;
-  object-fit: cover;
-  display: block;
+  backface-visibility: hidden;
+  border-radius: 4px 0 0 4px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Inside spread – two pages side by side */
-.card-inner {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;    /* full double spread */
-  height: 100%;
-  display: flex;
-  background: #fdfaf2;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+.card-face-front {
+  background: #ffffff;
 }
 
-/* Left inside page */
-.card-inner-left {
-  flex: 1;
+.card-face-back {
+  /* background: #fdfaf2; */
   border-right: 1px solid #e0d7c8;
+  transform: rotateY(180deg); /* so it faces viewer when cover is opened */
   background: repeating-linear-gradient(
     90deg,
     #fdfaf2,
@@ -71,19 +60,43 @@ body {
   ); /* very subtle pattern, optional */
 }
 
-/* Right inside page (where the message goes) */
+/* Cover image fills the front face */
+.card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 4px 0 0 4px;
+}
+
+/* Right inside page */
 .card-inner-right {
-  flex: 1;
-  padding: 24px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 100%;
+  background: #ffffff;
+  border-radius: 0 4px 4px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ffffff;
+
+  /* hidden when card is closed */
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
 
-/* Message block */
+/* Show the inside only when card is open */
+.card.open .card-inner-right {
+  opacity: 1;
+  transition-delay: 0.35s; /* appears after cover starts opening */
+}
+
 .card-message {
-  cursor: pointer; /* indicates you can click to close */
+  padding: 24px;
+  cursor: pointer; /* click to close */
   text-align: left;
   line-height: 1.4;
 }
@@ -92,8 +105,7 @@ body {
   margin-top: 0;
 }
 
-/* When the card is “open”, rotate the cover away */
+/* Open state: cover swings away, revealing its back as left page */
 .card.open .card-cover {
   transform: rotateY(-180deg);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }

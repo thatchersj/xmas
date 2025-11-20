@@ -115,12 +115,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadMessage();
 
-  // Open the card when the front cover is clicked
+  // Open the card when the cover is clicked
   cardCover.addEventListener("click", () => {
     card.classList.add("open");
   });
 
-  // Close the card when the message side is clicked
+  // Close the card when the message (right page) is clicked
   cardMessage.addEventListener("click", () => {
     card.classList.remove("open");
   });

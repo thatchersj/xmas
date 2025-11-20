@@ -59,24 +59,25 @@
 
   <div class="card-scene">
     <div class="card" id="card">
-      <!-- Front cover -->
+      <!-- Hinged cover: front + back (left inside page) -->
       <div class="card-cover" id="cardCover">
-        <img src="cards/front.jpg" alt="Christmas Card Front" class="card-image" />
+        <div class="card-face card-face-front">
+          <img src="cards/front.jpg" alt="Christmas Card Front" class="card-image" />
+        </div>
+        <div class="card-face card-face-back">
+          <!-- This is the LEFT inside page (back of the cover) -->
+        </div>
       </div>
 
-      <!-- Inside spread -->
-      <div class="card-inner">
-        <div class="card-inner-left">
-          <!-- left inside page (blank or subtle pattern) -->
-        </div>
-        <div class="card-inner-right">
-          <div class="card-message" id="cardMessage">
-            <p>Loading your Christmas message...</p>
-          </div>
+      <!-- Right-hand inside page -->
+      <div class="card-inner-right">
+        <div class="card-message" id="cardMessage">
+          <p>Loading your Christmas message...</p>
         </div>
       </div>
     </div>
   </div>
+
 
   <script src="script.js"></script>
 </body>
