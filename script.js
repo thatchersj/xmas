@@ -7,12 +7,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const GENERIC_TITLE = "Merry Christmas!";
   const GENERIC_MESSAGE = "Wishing you all the best in the new year!";
 
-  // --- URL parameter handling ---
   const urlParams = new URLSearchParams(window.location.search);
   const recipientId = urlParams.get("id");
   const keyFromUrl = urlParams.get("k"); // per-recipient secret
 
-  // Helpers for base64 <-> ArrayBuffer
+  // --- base64 helpers ---
   function base64ToArrayBuffer(base64) {
     const binaryString = atob(base64);
     const len = binaryString.length;
@@ -69,7 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       return arrayBufferToString(plaintextBuffer);
     } catch (e) {
-      // Any error (wrong key, tampering, etc.) will fall back to generic
       console.warn("Decryption failed or invalid data:", e);
       return null;
     }
@@ -80,7 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadMessage() {
-    // If no id or key, immediately show generic
+    // If no id or key → generic
     if (!recipientId || !keyFromUrl) {
       showGenericMessage();
       return;
@@ -97,20 +95,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const entry = data[recipientId];
 
       if (!entry) {
-        // Unknown id -> generic
+        // Unknown id → generic
         showGenericMessage();
         return;
       }
 
       const decrypted = await decryptMessage(entry, keyFromUrl);
       if (!decrypted) {
-        // Invalid key or failed decryption -> generic
+        // Wrong key or tampered data → generic
         showGenericMessage();
         return;
       }
 
-      // Success! Show personalised message
-      const safeName = recipientId; // or prettify if you want
+      const safeName = recipientId;
       cardMessage.innerHTML = `<h2>Dear ${safeName}</h2><p>${decrypted}</p>`;
     } catch (err) {
       console.error("Error loading encrypted messages:", err);
@@ -120,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadMessage();
 
-  // Flip the card on click (same behaviour as before)
+  // Flip the card on click
   cardImage.addEventListener("click", () => {
     card.classList.toggle("flipped");
   });
