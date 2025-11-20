@@ -148,3 +148,44 @@ body {
     font-size: 0.9rem;
   }
 }
+
+/* Mobile styling changes: fill screen and allow card flip */
+@media (max-width: 700px) {
+  .card-scene {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .card-scene.loading {
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  .card {
+    width: 90vw;
+    max-width: 600px;
+    height: auto;
+    aspect-ratio: 3 / 2;
+  }
+
+  .card-cover, .card-inner-right {
+    height: 100%;
+  }
+
+  .card-message {
+    padding: 16px;
+    font-size: 0.95rem;
+  }
+
+  .card.open .card-cover {
+    transform: rotateY(-180deg); /* reveal back cover */
+  }
+
+  /* Hide snowflakes if mobile height is too small to display them properly */
+  @media (max-height: 500px) {
+    .snowflake {
+      display: none;
+    }
+  }
+}

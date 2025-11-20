@@ -92,6 +92,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  
+  function waitForImage(img) {
+    return new Promise((resolve) => {
+      if (!img) {
+        resolve();
+        return;
+      }
+      if (img.complete) {
+        resolve();
+      } else {
+        img.addEventListener("load", resolve, { once: true });
+        img.addEventListener("error", resolve, { once: true });
+      }
+    });
+  }
+
   async function prepareCardScene() {
     try {
       await Promise.all([
@@ -104,6 +120,19 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     }
   }
+ {
+    try {
+      await Promise.all([
+        waitForImage(coverImage),
+        waitForImage(innerImage),
+      ]);
+    } finally {
+      if (cardScene) {
+        cardScene.classList.remove("loading");
+      }
+    }
+  }
+
 
   function showGenericMessage() {
     cardMessage.innerHTML = `<h2>${GENERIC_TITLE}</h2><p>${GENERIC_MESSAGE}</p>`;
@@ -165,7 +194,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadMessage();
+
   prepareCardScene();
+  if (window.innerWidth < 700) {
+    // On mobile: make the card fill the screen
+    card.style.width = "90vw";
+    card.style.maxWidth = "600px";
+    card.style.aspectRatio = "3 / 2";
+  }
+
 
   // Open the card when the cover is clicked
   cardCover.addEventListener("click", () => {
