@@ -9,9 +9,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const urlParams = new URLSearchParams(window.location.search);
   const recipientId = urlParams.get("id");
-  const keyFromUrl = urlParams.get("k"); // per-recipient secret
+  const keyFromUrl = urlParams.get("k");
 
-  // --- base64 helpers ---
   function base64ToArrayBuffer(base64) {
     const binaryString = atob(base64);
     const len = binaryString.length;
@@ -78,7 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function loadMessage() {
-    // If no id or key → generic
     if (!recipientId || !keyFromUrl) {
       showGenericMessage();
       return;
@@ -87,6 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const response = await fetch("messages-encrypted.json");
       if (!response.ok) {
+        console.error("Failed to fetch messages-encrypted.json:", response.status);
         showGenericMessage();
         return;
       }
@@ -95,20 +94,19 @@ document.addEventListener("DOMContentLoaded", () => {
       const entry = data[recipientId];
 
       if (!entry) {
-        // Unknown id → generic
+        console.warn("No entry found for recipientId:", recipientId);
         showGenericMessage();
         return;
       }
 
       const decrypted = await decryptMessage(entry, keyFromUrl);
       if (!decrypted) {
-        // Wrong key or tampered data → generic
+        console.warn("Decryption returned null for recipientId:", recipientId);
         showGenericMessage();
         return;
       }
 
-      const safeName = recipientId;
-      cardMessage.innerHTML = `<h2>Dear ${safeName}</h2><p>${decrypted}</p>`;
+      cardMessage.innerHTML = `<h2>Dear ${recipientId}</h2><p>${decrypted}</p>`;
     } catch (err) {
       console.error("Error loading encrypted messages:", err);
       showGenericMessage();
@@ -117,8 +115,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadMessage();
 
-  // Flip the card on click
+  // Flip to inside when the front image is clicked
   cardImage.addEventListener("click", () => {
     card.classList.toggle("flipped");
+  });
+
+  // Flip back to front when the message side is clicked
+  cardMessage.addEventListener("click", () => {
+    card.classList.remove("flipped"); // or .toggle("flipped") if you like
   });
 });

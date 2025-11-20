@@ -46,3 +46,7 @@ body {
 .card.flipped .card-message {
   display: block;
 }
+
+.card-message {
+  cursor: pointer;
+}
