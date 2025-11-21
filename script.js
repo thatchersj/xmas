@@ -7,6 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cardScene = document.getElementById("cardScene");
   const coverImage = document.getElementById("coverImage");
   const innerImage = document.getElementById("innerImage");
+  const innerImageMobile = document.getElementById("innerImageMobile");
 
 
   const GENERIC_TITLE = "Merry Christmas!";
@@ -92,39 +93,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  
-  function waitForImage(img) {
-    return new Promise((resolve) => {
-      if (!img) {
-        resolve();
-        return;
-      }
-      if (img.complete) {
-        resolve();
-      } else {
-        img.addEventListener("load", resolve, { once: true });
-        img.addEventListener("error", resolve, { once: true });
-      }
-    });
-  }
-
   async function prepareCardScene() {
     try {
       await Promise.all([
         waitForImage(coverImage),
         waitForImage(innerImage),
-      ]);
-    } finally {
-      if (cardScene) {
-        cardScene.classList.remove("loading");
-      }
-    }
-  }
- {
-    try {
-      await Promise.all([
-        waitForImage(coverImage),
-        waitForImage(innerImage),
+        waitForImage(innerImageMobile)
       ]);
     } finally {
       if (cardScene) {
@@ -196,14 +170,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadMessage();
 
   prepareCardScene();
-  if (window.innerWidth < 700) {
-    // On mobile: make the card fill the screen
-    card.style.width = "90vw";
-    card.style.maxWidth = "600px";
-    card.style.aspectRatio = "3 / 2";
-  }
-
-
   // Open the card when the cover is clicked
   cardCover.addEventListener("click", () => {
     card.classList.toggle("open");
