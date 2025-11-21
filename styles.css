@@ -73,6 +73,10 @@ body {
     border-style: inset;
 }
 
+.inner-card-image-mobile {
+    display: none;
+}
+
 /* Right inside page */
 .card-inner-right {
   position: absolute;
@@ -189,6 +193,7 @@ body {
     margin-top: 16px;
     max-width: 100%;
     height: auto;
+    display: inherit;
   }
 
   /* Hide the left-page inner image used for desktop double-spread */
