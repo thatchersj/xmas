@@ -1,22 +1,7 @@
 {
-  "alice": {
-    "salt": "4TUhSbpFJsYynjtJ++wCrw==",
-    "iv": "FGQpu1q1wBr7fdmy",
-    "ciphertext": "xN/86dnCeBlvv/kpTKvmQXaDQXpbYw7tPM5xvGn924JzFL+uRBmHMQ3oLlZG71mEJm70/9H4owHxi0+XsFcuXrdYpLyrqr3S"
-  },
-  "bob": {
-    "salt": "3i2vnKkIfvxW7DIPaks8ww==",
-    "iv": "ERTFQgfiFxlfzJIE",
-    "ciphertext": "UN4woNlissotPn3PbvSK/VMSbQwr4FZzXDzvQ8h+YbmKML0ZKgKlCkQ7NLOhPuxQtQLaf8fa0Ken4BkMrdpN1STkzjUJo+/hVE4ENBmVfqsMFD5beEQ="
-  },
-  "carol": {
-    "salt": "3b1mb/vW2HVYDFCxTIil2Q==",
-    "iv": "g3rOUZGYai2ZOunr",
-    "ciphertext": "EwGpjThZC0DABlJmqo76igMXdgW2XVv+JtsOEsEMruQjzt5p52x17LCYwAwtkTalzobg96VZNDfuuOoYvCMdcO/73s89B9ZuHIUoifrU80FTDDAG0w=="
-  },
-  "David": {
-    "iv": "3ULuQRK8a9Nv3VNI",
-    "salt": "LhZaC7d7g2+FdZOHDlpPKA==",
-    "ciphertext": "vacXCvIvdkCimZqgMqmrQz4NWZkyYYccGP0wuFy+zQ/K7rToV6lVPRCApUxAGFCNPtZEZqvBjfb4F42/FsODlUyPEoJFZZTknmI5TKZYE0MXoYU0AB9SLAOLiyzyGcpvWrZVyWCxudl7VJ8icXEbIoXlQ7r+16drv7tDZJXYlcVyoafGAVfnH6kUjiLxIvYWodL1gbwWp7/M8lPHIqDFlLE="
+  "DH": {
+    "iv": "zBo3G4lb8hRYI1dj",
+    "salt": "wL+CnaFm6Ddf3KL1eRgaeA==",
+    "ciphertext": "VtMbzpGJPt70jFWZgBhFmm49MaUzUqyWibwOeSXirQilooIBRXb+YJwgQYd+352sB17IaH59jXrcmKWvM7Q1WklBLSGE0AGHDhRPdF3j1nJ87QW+z3JvQEIelaYkYISMP+c="
   }
 }

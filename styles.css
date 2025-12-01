@@ -94,8 +94,8 @@ body {
 
 .card-message {
   padding: 24px;
-  text-align: left;
-  line-height: 1.4;
+  text-align: center;
+  line-height: 1.1;
 }
 
 .card-message h2 {
