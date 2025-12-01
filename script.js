@@ -160,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // Not JSON → old style, treat decrypted as plain message
       }
 
-      cardMessage.innerHTML = `<p style="text-align:left">Dear ${displayName}</p><h2>Merry Christmas</br><small><small>and a</small></small>Happy New Year</h2><p>${messageText}</p>`;
+      cardMessage.innerHTML = `<p style="text-align:left;margin-bottom:24px;">Dear ${displayName},</p><h2>Merry Christmas<br><small><small>and a</small></small><br>Happy New Year</h2><p>${messageText}</p><p><br>Love from,<br><br>Stephen, Amanda<br>and Josephine</p>`;
     } catch (err) {
       console.error("Error loading encrypted messages:", err);
       showGenericMessage();
