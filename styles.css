@@ -99,7 +99,8 @@ body {
 }
 
 .card-message h2 {
-  margin-top: 0;
+  margin-top: 36px;
+  margin-bottom: 36px;
 }
 
 /* Open state: cover swings away, revealing its back as left page */

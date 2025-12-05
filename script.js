@@ -9,10 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const innerImage = document.getElementById("innerImage");
   const innerImageMobile = document.getElementById("innerImageMobile");
 
-
-  const GENERIC_TITLE = "Merry Christmas!";
-  const GENERIC_MESSAGE = "Wishing you all the best in the new year!";
-
   const urlParams = new URLSearchParams(window.location.search);
   const recipientId = urlParams.get("id");
   const keyFromUrl = urlParams.get("k");
@@ -109,7 +105,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   function showGenericMessage() {
-    cardMessage.innerHTML = `<h2>${GENERIC_TITLE}</h2><p>${GENERIC_MESSAGE}</p>`;
+    cardMessage.innerHTML = `<h2>Merry Christmas<br><small><small>and a</small></small><br>Happy New Year</h2><p>Wishing you all the best for 2026!</p><p><br>Love from,<br><br>Stephen, Amanda<br>and Josephine</p>`;
   }
 
   async function loadMessage() {
