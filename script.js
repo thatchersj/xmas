@@ -167,82 +167,96 @@ document.addEventListener("DOMContentLoaded", () => {
 
   prepareCardScene();
   
-  // --- Mobile triple flip logic ---
+  
+  
+  // --- Mobile triangular prism logic: front -> message -> image -> ... ---
   const isMobile = window.matchMedia("(max-width: 768px)").matches;
-
   if (!isMobile) {
     // Desktop / tablet: preserve original behavior
-    // Open the card when the cover is clicked
     cardCover.addEventListener("click", () => {
       card.classList.toggle("open");
     });
-    // Close the card when the message (right page) is clicked
     cardInner.addEventListener("click", () => {
       card.classList.remove("open");
     });
   } else {
-    // Mobile: advance through three faces: front -> message -> image -> back to front
-    let angle = 0; // degrees
-    let phase = 0; // 0: front, 1: message, 2: image
+    // Build a 3-sided prism around Y axis with faces at 0, 120, 240 degrees.
+    const prism = document.createElement("div");
+    prism.className = "mobile-prism-wrap";
+    // Create 3 faces
+    const f0 = document.createElement("div"); // Front face (cover)
+    const f1 = document.createElement("div"); // Message face
+    const f2 = document.createElement("div"); // Inner image face
+    f0.className = "tri-face tri-face-0";
+    f1.className = "tri-face tri-face-1";
+    f2.className = "tri-face tri-face-2";
 
-    // ensure both message and image exist
-    function showMessageOnly() {
-      if (cardMessage) cardMessage.style.display = "block";
-      if (innerImageMobile) innerImageMobile.style.display = "none";
+    // Populate faces
+    // Face 0: cover image
+    if (coverImage && coverImage.src) {
+      const img0 = document.createElement("img");
+      img0.src = coverImage.src;
+      img0.alt = coverImage.alt || "Card Front";
+      f0.appendChild(img0);
+    } else {
+      // fallback
+      const p = document.createElement("p");
+      p.textContent = "Front";
+      f0.appendChild(p);
     }
-    function showImageOnly() {
-      if (cardMessage) cardMessage.style.display = "none";
-      if (innerImageMobile) innerImageMobile.style.display = "block";
+
+    // Face 1: message (clone current message content)
+    const msgContainer = document.createElement("div");
+    msgContainer.className = "card-message";
+    msgContainer.innerHTML = (cardMessage && cardMessage.innerHTML) ? cardMessage.innerHTML : "<p>Loading your Christmas message...</p>";
+    f1.appendChild(msgContainer);
+
+    // Face 2: inner image (use innerImageMobile if present, else innerImage)
+    const imageSrc = innerImageMobile?.src || innerImage?.src || null;
+    if (imageSrc) {
+      const img2 = document.createElement("img");
+      img2.src = imageSrc;
+      img2.alt = "Card Inner";
+      f2.appendChild(img2);
+    } else {
+      const p = document.createElement("p");
+      p.textContent = "Inner image";
+      f2.appendChild(p);
     }
-    function normalizeAngle() {
-      if (angle >= 540) {
-        angle -= 540; // keep angles small after full cycle
-      }
+
+    // Insert prism into .card (replacing visual role of the other elements on mobile)
+    card.appendChild(prism);
+    prism.appendChild(f0);
+    prism.appendChild(f1);
+    prism.appendChild(f2);
+
+    // Geometry: For N=3 faces, radius r = faceWidth / (2 * tan(pi/N)) = faceWidth / sqrt(3)
+    let rotationStep = -120; // degrees per click
+    let angle = 0;
+
+    function positionFaces() {
+      const rect = card.getBoundingClientRect();
+      const w = rect.width || 300;
+      const r = w / Math.sqrt(3);
+      f0.style.transform = `rotateY(0deg) translateZ(${r}px)`;
+      f1.style.transform = `rotateY(120deg) translateZ(${r}px)`;
+      f2.style.transform = `rotateY(240deg) translateZ(${r}px)`;
     }
-    // ensure transitions apply to the whole card on mobile
-    card.style.transition = "transform 0.8s ease";
-    card.style.transformStyle = "preserve-3d";
-    card.style.transformOrigin = "center center";
+
+    positionFaces();
+    window.addEventListener("resize", positionFaces);
 
     function advance() {
-      if (phase === 0) {
-        // front -> message (rotate 180)
-        showMessageOnly();
-        angle += 180;
-        card.style.transform = `rotateY(${angle}deg)`;
-        phase = 1;
-      } else if (phase === 1) {
-        // message -> image (rotate another 180 to 360)
-        showImageOnly();
-        angle += 180;
-        card.style.transform = `rotateY(${angle}deg)`;
-        phase = 2;
-      } else {
-        // image -> front (rotate another 180 to 540)
-        angle += 180;
-        card.style.transform = `rotateY${"("}${angle}deg${")"}`;
-        phase = 0;
-        // after the flip completes, normalize angle
-        card.addEventListener("transitionend", function handler(e){
-          if (e.propertyName === "transform") {
-            normalizeAngle();
-            card.style.transform = `rotateY(${angle}deg)`;
-            card.removeEventListener("transitionend", handler);
-          }
-        });
-      }
+      angle = (angle + rotationStep);
+      prism.style.transform = `rotateY(${angle}deg)`;
     }
 
-    // Click anywhere on the card to advance the sequence
-    card.addEventListener("click", (ev) => {
-      ev.preventDefault();
-      ev.stopPropagation();
+    // Tap anywhere on the card to rotate forward
+    card.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       advance();
     }, true);
-
-    // Prevent the desktop listeners from firing if any were attached elsewhere
-    if (cardCover) cardCover.onclick = null;
-    if (cardInner) cardInner.onclick = null;
   }
 
 });
