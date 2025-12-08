@@ -166,13 +166,83 @@ document.addEventListener("DOMContentLoaded", () => {
   loadMessage();
 
   prepareCardScene();
-  // Open the card when the cover is clicked
-  cardCover.addEventListener("click", () => {
-    card.classList.toggle("open");
-  });
+  
+  // --- Mobile triple flip logic ---
+  const isMobile = window.matchMedia("(max-width: 768px)").matches;
 
-  // Close the card when the message (right page) is clicked
-  cardInner.addEventListener("click", () => {
-    card.classList.remove("open");
-  });
+  if (!isMobile) {
+    // Desktop / tablet: preserve original behavior
+    // Open the card when the cover is clicked
+    cardCover.addEventListener("click", () => {
+      card.classList.toggle("open");
+    });
+    // Close the card when the message (right page) is clicked
+    cardInner.addEventListener("click", () => {
+      card.classList.remove("open");
+    });
+  } else {
+    // Mobile: advance through three faces: front -> message -> image -> back to front
+    let angle = 0; // degrees
+    let phase = 0; // 0: front, 1: message, 2: image
+
+    // ensure both message and image exist
+    function showMessageOnly() {
+      if (cardMessage) cardMessage.style.display = "block";
+      if (innerImageMobile) innerImageMobile.style.display = "none";
+    }
+    function showImageOnly() {
+      if (cardMessage) cardMessage.style.display = "none";
+      if (innerImageMobile) innerImageMobile.style.display = "block";
+    }
+    function normalizeAngle() {
+      if (angle >= 540) {
+        angle -= 540; // keep angles small after full cycle
+      }
+    }
+    // ensure transitions apply to the whole card on mobile
+    card.style.transition = "transform 0.8s ease";
+    card.style.transformStyle = "preserve-3d";
+    card.style.transformOrigin = "center center";
+
+    function advance() {
+      if (phase === 0) {
+        // front -> message (rotate 180)
+        showMessageOnly();
+        angle += 180;
+        card.style.transform = `rotateY(${angle}deg)`;
+        phase = 1;
+      } else if (phase === 1) {
+        // message -> image (rotate another 180 to 360)
+        showImageOnly();
+        angle += 180;
+        card.style.transform = `rotateY(${angle}deg)`;
+        phase = 2;
+      } else {
+        // image -> front (rotate another 180 to 540)
+        angle += 180;
+        card.style.transform = `rotateY${"("}${angle}deg${")"}`;
+        phase = 0;
+        // after the flip completes, normalize angle
+        card.addEventListener("transitionend", function handler(e){
+          if (e.propertyName === "transform") {
+            normalizeAngle();
+            card.style.transform = `rotateY(${angle}deg)`;
+            card.removeEventListener("transitionend", handler);
+          }
+        });
+      }
+    }
+
+    // Click anywhere on the card to advance the sequence
+    card.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      ev.stopPropagation();
+      advance();
+    }, true);
+
+    // Prevent the desktop listeners from firing if any were attached elsewhere
+    if (cardCover) cardCover.onclick = null;
+    if (cardInner) cardInner.onclick = null;
+  }
+
 });

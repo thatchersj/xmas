@@ -94,6 +94,7 @@ body {
 
 .card-message {
   padding: 24px;
+  margin:auto;
   text-align: center;
   line-height: 1.1;
 }
