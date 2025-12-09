@@ -191,20 +191,20 @@ body {
 
   /* Base message text */
   .card-message {
-    font-size: clamp(.4rem, 0.6vh, 1.6rem);  /* min, fluid, max */
+    font-size: clamp(.4rem, 3.5vh, 1.6rem);  /* min, fluid, max */
     line-height: 1.2;
   }
 
   /* The big greeting heading */
   .card-message h2 {
-    font-size: clamp(.6rem, 1vw, 2rem);
+    font-size: clamp(.6rem, 6vw, 2rem);
     margin-top: clamp(1em, 1vh, 36px);
     margin-bottom: clamp(2em, 1vh, 36px);
   }
 
   /* Optional: the "Dear X" line or similar intros */
   .card-message p {
-    font-size: clamp(.4rem, 1.2vw, 1.6rem);
+    font-size: clamp(.4rem, 3.5vw, 1.6rem);
   }
 
   .inner-card-image-mobile {
