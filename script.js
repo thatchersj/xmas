@@ -9,6 +9,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const innerImage = document.getElementById("innerImage");
   const innerImageMobile = document.getElementById("innerImageMobile");
 
+  // Helper to set the message consistently (desktop + mobile prism)
+  function setDisplayedMessage(htmlString) {
+    if (cardMessage) {
+      cardMessage.innerHTML = htmlString;
+    }
+    if (typeof window !== "undefined" && window.__prismMessageEl) {
+      window.__prismMessageEl.innerHTML = htmlString;
+    }
+  }
+
+
   const urlParams = new URLSearchParams(window.location.search);
   const recipientId = urlParams.get("id");
   const keyFromUrl = urlParams.get("k");
@@ -105,12 +116,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   function showGenericMessage() {
-    cardMessage.innerHTML = `<h2>Merry Christmas<br><small><small>and a</small></small><br>Happy New Year</h2><p>Wishing you all the best for 2026!</p><p><br>Love from,<br><br>Stephen, Amanda<br>and Josephine</p>`;
+    setDisplayedMessage(`<h2>Merry Christmas<br><small><small>and a</small></small><br>Happy New Year</h2><p>Wishing you all the best for 2026!</p><p><br>Love from,<br><br>Stephen, Amanda<br>and Josephine</p>`);
+  }
+
+  function showPseudoGenericMessage(displayName) {
+    setDisplayedMessage(`<p style="text-align:left;margin-bottom:24px;">Dear ${displayName},</p><h2>Merry Christmas<br><small><small>and a</small></small><br>Happy New Year</h2><p>Wishing you all the best for 2026!</p><p><br>Love from,<br><br>Stephen, Amanda<br>and Josephine</p>`);
   }
 
   async function loadMessage() {
-    if (!recipientId || !keyFromUrl) {
+    if (!recipientId) {
       showGenericMessage();
+      return;
+    } 
+    if (!keyFromUrl) {
+      showPseudoGenericMessage(recipientId);
       return;
     }
 
@@ -127,15 +146,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!entry) {
         console.warn("No entry found for recipientId:", recipientId);
-        showGenericMessage();
+        showPseudoGenericMessage(recipientId);
         return;
       }
 
       const decrypted = await decryptMessage(entry, keyFromUrl);
       if (!decrypted) {
-      console.warn("Decryption returned null for recipientId:", recipientId);
-      showGenericMessage();
-      return;
+        console.warn("Decryption returned null for recipientId:", recipientId);
+        showPseudoGenericMessage(recipientId);
+        return;
       }
 
       let displayName = recipientId;
@@ -156,34 +175,46 @@ document.addEventListener("DOMContentLoaded", () => {
       // Not JSON → old style, treat decrypted as plain message
       }
 
-      cardMessage.innerHTML = `<p style="text-align:left;margin-bottom:24px;">Dear ${displayName},</p><h2>Merry Christmas<br><small><small>and a</small></small><br>Happy New Year</h2><p>${messageText}</p><p><br>Love from,<br><br>Stephen, Amanda<br>and Josephine</p>`;
+      setDisplayedMessage(`<p style="text-align:left;margin-bottom:24px;">Dear ${displayName},</p><h2>Merry Christmas<br><small><small>and a</small></small><br>Happy New Year</h2><p>${messageText}</p><p><br>Love from,<br><br>Stephen, Amanda<br>and Josephine</p>`);
     } catch (err) {
       console.error("Error loading encrypted messages:", err);
       showGenericMessage();
     }
   }
+  // First load the (possibly encrypted) message, then set up scene + interactions.
+  loadMessage()
+    .catch((err) => {
+      console.error("Error in loadMessage:", err);
+      showGenericMessage();
+    })
+    .finally(() => {
+      prepareCardScene();
+      const isMobile = window.matchMedia("(max-width: 768px)").matches;
+      if (isMobile) {
+        initMobilePrism();
+      } else {
+        initDesktopCardClicks();
+      }
+    });
 
-  loadMessage();
-
-  prepareCardScene();
-  
-  
-  
-  // --- Mobile triangular prism logic: front -> message -> image -> ... ---
-  const isMobile = window.matchMedia("(max-width: 768px)").matches;
-  if (!isMobile) {
-    // Desktop / tablet: preserve original behavior
+  function initDesktopCardClicks() {
+    if (!cardCover || !cardInner) return;
+    // Desktop / larger screens: original open/close behavior
     cardCover.addEventListener("click", () => {
       card.classList.toggle("open");
     });
     cardInner.addEventListener("click", () => {
       card.classList.remove("open");
     });
-  } else {
+  }
+
+  function initMobilePrism() {
+    if (!card) return;
+
     // Build a 3-sided prism around Y axis with faces at 0, 120, 240 degrees.
     const prism = document.createElement("div");
     prism.className = "mobile-prism-wrap";
-    // Create 3 faces
+
     const f0 = document.createElement("div"); // Front face (cover)
     const f1 = document.createElement("div"); // Message face
     const f2 = document.createElement("div"); // Inner image face
@@ -191,7 +222,6 @@ document.addEventListener("DOMContentLoaded", () => {
     f1.className = "tri-face tri-face-1";
     f2.className = "tri-face tri-face-2";
 
-    // Populate faces
     // Face 0: cover image
     if (coverImage && coverImage.src) {
       const img0 = document.createElement("img");
@@ -199,20 +229,22 @@ document.addEventListener("DOMContentLoaded", () => {
       img0.alt = coverImage.alt || "Card Front";
       f0.appendChild(img0);
     } else {
-      // fallback
       const p = document.createElement("p");
       p.textContent = "Front";
       f0.appendChild(p);
     }
 
-    // Face 1: message (clone current message content)
+    // Face 1: message - use the *final* desktop message HTML
     const msgContainer = document.createElement("div");
     msgContainer.className = "card-message";
-    msgContainer.innerHTML = (cardMessage && cardMessage.innerHTML) ? cardMessage.innerHTML : "<p>Loading your Christmas message...</p>";
+    msgContainer.innerHTML = cardMessage && cardMessage.innerHTML
+      ? cardMessage.innerHTML
+      : "<p>Loading your Christmas message...</p>";
     f1.appendChild(msgContainer);
+    try { window.__prismMessageEl = msgContainer; } catch (e) {}
 
     // Face 2: inner image (use innerImageMobile if present, else innerImage)
-    const imageSrc = innerImageMobile?.src || innerImage?.src || null;
+    const imageSrc = (innerImageMobile && innerImageMobile.src) || (innerImage && innerImage.src) || null;
     if (imageSrc) {
       const img2 = document.createElement("img");
       img2.src = imageSrc;
@@ -224,15 +256,15 @@ document.addEventListener("DOMContentLoaded", () => {
       f2.appendChild(p);
     }
 
-    // Insert prism into .card (replacing visual role of the other elements on mobile)
+    // Insert prism into .card
     card.appendChild(prism);
     prism.appendChild(f0);
     prism.appendChild(f1);
     prism.appendChild(f2);
 
-    // Geometry: For N=3 faces, radius r = faceWidth / (2 * tan(pi/N)) = faceWidth / sqrt(3)
-    let rotationStep = -120; // degrees per click
+    // Geometry: radius for N=3 faces
     let angle = 0;
+    const step = -120; // rotate forward
 
     function positionFaces() {
       const rect = card.getBoundingClientRect();
@@ -242,12 +274,11 @@ document.addEventListener("DOMContentLoaded", () => {
       f1.style.transform = `rotateY(120deg) translateZ(${r}px)`;
       f2.style.transform = `rotateY(240deg) translateZ(${r}px)`;
     }
-
     positionFaces();
     window.addEventListener("resize", positionFaces);
 
     function advance() {
-      angle = (angle + rotationStep);
+      angle += step;
       prism.style.transform = `rotateY(${angle}deg)`;
     }
 
