@@ -16,8 +16,6 @@ body {
 /* Full double-spread */
 .card {
   position: relative;
-  width: 600px;
-  height: 400px;
   cursor: pointer; /* click to close */
 }
 
@@ -191,6 +189,24 @@ body {
     font-size: 1.4rem;
   }
 
+  /* Base message text */
+  .card-message {
+    font-size: clamp(.4rem, 0.6vh, 1.6rem);  /* min, fluid, max */
+    line-height: 1.2;
+  }
+
+  /* The big greeting heading */
+  .card-message h2 {
+    font-size: clamp(.6rem, 1vw, 2rem);
+    margin-top: clamp(1em, 1vh, 36px);
+    margin-bottom: clamp(2em, 1vh, 36px);
+  }
+
+  /* Optional: the "Dear X" line or similar intros */
+  .card-message p {
+    font-size: clamp(.4rem, 1.2vw, 1.6rem);
+  }
+
   .inner-card-image-mobile {
     margin-top: 16px;
     max-width: 100%;
@@ -254,7 +270,7 @@ body {
   /* Message face: give card-like padding and typography */
   .tri-face.tri-face-1 .card-message {
     max-width: 90%;
-    padding: 24px;
+    padding: min(5vw, 24px);
     margin: auto;
     text-align: center;
     line-height: 1.1;
@@ -292,5 +308,63 @@ body {
     width: 100%;
     height: 100%;
     border-radius: 12px;
+  }
+}
+
+
+@media (max-width: 768px) {
+  html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* prevent scrolling both directions */
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 16px; /* keep the nice padding around the card */
+  }
+
+  .card-scene {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+  }
+}
+
+@media (min-width: 769px) {
+  .card {
+    /* keep it 3:2 (1.5) */
+    aspect-ratio: 3 / 2;
+
+    /* grow as large as possible but never exceed viewport */
+    max-width: 90vw;
+    max-height: 90vh;
+
+    /* let width drive the size within those constraints */
+    width: min(90vw, 90vh * 1.5);
+    height: auto;
+  }
+
+  /* Base message text */
+  .card-message {
+    font-size: clamp(1rem, 1.2vw, 1.6rem);  /* min, fluid, max */
+    line-height: 1.2;
+  }
+
+  /* The big greeting heading */
+  .card-message h2 {
+    font-size: clamp(1.8rem, 3vw, 2.6rem);
+  }
+
+  /* Optional: the "Dear X" line or similar intros */
+  .card-message p {
+    font-size: clamp(1rem, 1.2vw, 1.6rem);
   }
 }
